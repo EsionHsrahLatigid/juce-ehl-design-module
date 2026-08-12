@@ -42,5 +42,7 @@ if(EHL_JUCE_DESIGN_BUILD_TESTS)
     enable_testing()
     add_executable(ehl_juce_design_tests tests/EhlDesignTests.cpp)
     target_link_libraries(ehl_juce_design_tests PRIVATE EHL::JuceDesign juce::juce_gui_basics)
+    target_compile_definitions(ehl_juce_design_tests PRIVATE
+        EHL_JUCE_DESIGN_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME ehl_juce_design_tests COMMAND ehl_juce_design_tests)
 endif()

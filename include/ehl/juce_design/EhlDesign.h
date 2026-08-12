@@ -37,6 +37,12 @@ struct Metrics final
     static constexpr int valueWidth = 72;
     static constexpr int valueHeight = 20;
     static constexpr int commandHeight = 40;
+    static constexpr int shortLogoViewBoxWidth = 512;
+    static constexpr int shortLogoViewBoxHeight = 192;
+    static constexpr int headerLogoX = 528;
+    static constexpr int headerLogoY = 12;
+    static constexpr int headerLogoWidth = 96;
+    static constexpr int headerLogoHeight = 36;
 };
 
 struct LabelledControlBounds final
@@ -71,6 +77,13 @@ void styleLabel(juce::Label&);
 void styleSlider(juce::Slider&);
 void styleToggle(juce::ToggleButton&);
 void styleComboBox(juce::ComboBox&);
+
+const char* shortLogoPathData() noexcept;
+const juce::Path& shortLogoPath();
+juce::Rectangle<float> headerLogoBounds(juce::Rectangle<int> editorBounds) noexcept;
+juce::AffineTransform shortLogoTransform(juce::Rectangle<float> targetBounds) noexcept;
+void paintShortLogo(juce::Graphics&, juce::Rectangle<float> targetBounds,
+                    juce::Colour colour = Palette::paper());
 
 void paintEditorChrome(juce::Graphics&, juce::Rectangle<int> editorBounds,
                        const juce::String& productName,

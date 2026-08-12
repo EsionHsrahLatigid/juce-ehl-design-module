@@ -14,6 +14,15 @@ constexpr juce::uint32 lowValue = 0xff2a2a2a;
 constexpr juce::uint32 midValue = 0xff8a8a86;
 constexpr juce::uint32 paperValue = 0xfff2f2f0;
 
+constexpr const char* canonicalShortLogoPathData =
+    "M133.18,66.35 L133.18,40.94 L56.94,40.94 L56.94,66.35 Z "
+    "M285.65,104.47 L285.65,118.32 L311.06,118.32 L311.06,104.47 L311.06,79.06 L285.65,79.06 L217.88,79.06 L217.88,24.00 L192.47,24.00 L192.47,79.06 L192.47,104.47 L192.47,142.59 L217.88,142.59 L217.88,111.55 L225.96,111.55 L225.96,107.06 L250.61,107.06 L250.61,104.47 Z "
+    "M193.15,108.96 L193.15,101.76 L242.53,101.76 L242.53,104.35 L201.23,104.35 L201.23,108.96 Z "
+    "M473.74,136.32 L473.74,142.59 L480.47,142.59 L480.47,117.18 L395.76,117.18 L395.76,53.52 L381.70,53.52 L381.70,49.20 L395.76,49.20 L395.76,24.00 L370.35,24.00 L370.35,117.18 L370.35,142.59 L395.76,142.59 L449.04,142.59 L449.04,136.32 Z "
+    "M158.59,91.76 L158.59,66.35 L133.18,66.35 L133.18,69.36 L152.74,69.36 L152.74,73.68 L133.18,73.68 L133.18,91.76 L56.94,91.76 L56.94,73.68 L49.49,73.68 L49.49,69.36 L56.94,69.36 L56.94,66.35 L31.53,66.35 L31.53,91.76 L31.53,117.18 L31.53,142.59 L56.94,142.59 L56.94,117.18 L158.59,117.18 Z "
+    "M285.65,142.59 L311.06,142.59 L311.06,122.64 L285.65,122.64 Z "
+    "M158.59,142.59 L56.94,142.59 L56.94,168.00 L158.59,168.00 Z";
+
 juce::Colour structureColour(const juce::Component& component)
 {
     if (! component.isEnabled())
@@ -269,6 +278,68 @@ void styleComboBox(juce::ComboBox& box)
     box.setWantsKeyboardFocus(true);
 }
 
+const char* shortLogoPathData() noexcept
+{
+    return canonicalShortLogoPathData;
+}
+
+const juce::Path& shortLogoPath()
+{
+    static const auto path = []
+    {
+        auto result = juce::Drawable::parseSVGPath(canonicalShortLogoPathData);
+        result.setUsingNonZeroWinding(false);
+        return result;
+    }();
+
+    return path;
+}
+
+juce::Rectangle<float> headerLogoBounds(juce::Rectangle<int> bounds) noexcept
+{
+    const float scale = juce::jmin(1.0f,
+                                   static_cast<float>(bounds.getWidth())
+                                       / static_cast<float>(Metrics::defaultWidth));
+    const float width = static_cast<float>(Metrics::headerLogoWidth) * scale;
+    const float height = static_cast<float>(Metrics::headerLogoHeight) * scale;
+    const float rightInset = static_cast<float>(Metrics::defaultWidth
+                                                 - Metrics::headerLogoX
+                                                 - Metrics::headerLogoWidth)
+                             * scale;
+
+    return { static_cast<float>(bounds.getRight()) - rightInset - width,
+             static_cast<float>(bounds.getY()) + static_cast<float>(Metrics::headerLogoY) * scale,
+             width,
+             height };
+}
+
+void paintShortLogo(juce::Graphics& g, juce::Rectangle<float> targetBounds,
+                    juce::Colour colour)
+{
+    if (targetBounds.isEmpty())
+        return;
+
+    g.setColour(colour);
+    g.fillPath(shortLogoPath(), shortLogoTransform(targetBounds));
+}
+
+juce::AffineTransform shortLogoTransform(juce::Rectangle<float> targetBounds) noexcept
+{
+    if (targetBounds.isEmpty())
+        return {};
+
+    const float scale = juce::jmin(targetBounds.getWidth()
+                                       / static_cast<float>(Metrics::shortLogoViewBoxWidth),
+                                   targetBounds.getHeight()
+                                       / static_cast<float>(Metrics::shortLogoViewBoxHeight));
+    const float width = static_cast<float>(Metrics::shortLogoViewBoxWidth) * scale;
+    const float height = static_cast<float>(Metrics::shortLogoViewBoxHeight) * scale;
+    const float x = targetBounds.getX() + (targetBounds.getWidth() - width) * 0.5f;
+    const float y = targetBounds.getY() + (targetBounds.getHeight() - height) * 0.5f;
+
+    return juce::AffineTransform::scale(scale).translated(x, y);
+}
+
 void paintEditorChrome(juce::Graphics& g, juce::Rectangle<int> bounds,
                        const juce::String& productName, const juce::String& effectClass)
 {
@@ -286,9 +357,7 @@ void paintEditorChrome(juce::Graphics& g, juce::Rectangle<int> bounds,
     g.drawText(effectClass, bounds.getX() + Metrics::margin, bounds.getY() + 36,
                bounds.getWidth() - Metrics::margin * 2, 12,
                juce::Justification::centredLeft, true);
-    g.drawText("ESIONHSRAHLATIGID", bounds.getX() + Metrics::margin, bounds.getY() + 24,
-               bounds.getWidth() - Metrics::margin * 2, 16,
-               juce::Justification::centredRight, true);
+    paintShortLogo(g, headerLogoBounds(bounds));
     g.setColour(Palette::low());
     g.fillRect(bounds.getX() + Metrics::margin, bounds.getY() + Metrics::dividerY,
                juce::jmax(0, bounds.getWidth() - Metrics::margin * 2), 1);

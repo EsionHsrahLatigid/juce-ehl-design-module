@@ -2,10 +2,14 @@
 
 #include <juce_events/juce_events.h>
 
+#include <cmath>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <set>
+#include <string>
 
 namespace
 {
@@ -105,6 +109,53 @@ int main()
     require(Palette::mid().getARGB() == 0xff8a8a86, "mid token");
     require(Palette::paper().getARGB() == 0xfff2f2f0, "paper token");
     require(Metrics::commandHeight == 40, "command controls retain a deliberate visual target");
+    require(Metrics::shortLogoViewBoxWidth == 512 && Metrics::shortLogoViewBoxHeight == 192,
+            "short logo viewBox matches the canonical asset");
+    require(Metrics::headerLogoWidth == 96 && Metrics::headerLogoHeight == 36,
+            "header logo keeps the YUP contract size");
+
+    const auto logoPathBounds = shortLogoPath().getBounds();
+    require(! logoPathBounds.isEmpty(), "short logo path parses");
+    require(logoPathBounds.getX() >= 0.0f
+                && logoPathBounds.getRight() <= static_cast<float>(Metrics::shortLogoViewBoxWidth),
+            "short logo path stays inside the horizontal viewBox");
+    require(logoPathBounds.getY() >= 0.0f
+                && logoPathBounds.getBottom() <= static_cast<float>(Metrics::shortLogoViewBoxHeight),
+            "short logo path stays inside the vertical viewBox");
+
+    std::ifstream logoFile { std::string { EHL_JUCE_DESIGN_SOURCE_DIR }
+                             + "/assets/logos/white/logo-short.svg" };
+    std::ostringstream logoBuffer;
+    logoBuffer << logoFile.rdbuf();
+    const auto logoSvg = logoBuffer.str();
+    require(logoFile.good() || logoFile.eof(), "canonical short logo SVG is readable");
+    require(logoSvg.find(shortLogoPathData()) != std::string::npos,
+            "embedded path matches canonical short logo SVG");
+    require(logoSvg.find("<text") == std::string::npos,
+            "canonical short logo contains no text element");
+    require(logoSvg.find("<image") == std::string::npos,
+            "canonical short logo contains no raster image");
+    require(logoSvg.find("<filter") == std::string::npos,
+            "canonical short logo contains no filter");
+
+    const auto defaultLogoBounds = headerLogoBounds(
+        { 0, 0, Metrics::defaultWidth, Metrics::defaultHeight });
+    require(defaultLogoBounds == juce::Rectangle<float>(528.0f, 12.0f, 96.0f, 36.0f),
+            "default header logo placement matches YUP");
+    const auto renderedLogoBounds = logoPathBounds.transformedBy(
+        shortLogoTransform(defaultLogoBounds));
+    require(std::abs(renderedLogoBounds.getX() - 533.9119f) < 0.01f
+                && std::abs(renderedLogoBounds.getY() - 16.5f) < 0.01f
+                && std::abs(renderedLogoBounds.getWidth() - 84.1763f) < 0.01f
+                && std::abs(renderedLogoBounds.getHeight() - 27.0f) < 0.01f,
+            "short logo uses the canonical SVG viewBox transform");
+    const auto minimumLogoBounds = headerLogoBounds(
+        { 0, 0, Metrics::minimumWidth, Metrics::minimumHeight });
+    require(std::abs(minimumLogoBounds.getX() - 422.4f) < 0.01f
+                && std::abs(minimumLogoBounds.getY() - 9.6f) < 0.01f
+                && std::abs(minimumLogoBounds.getWidth() - 76.8f) < 0.01f
+                && std::abs(minimumLogoBounds.getHeight() - 28.8f) < 0.01f,
+            "minimum header logo scales with the compact editor width");
 
     checkLayout({ 0, 0, Metrics::defaultWidth, Metrics::defaultHeight });
     checkLayout({ 0, 0, Metrics::minimumWidth, Metrics::minimumHeight });
@@ -161,6 +212,11 @@ int main()
     require(image.getPixelAt(0, 4) == Palette::ink(), "chrome fills ink background below top rule");
     require(image.getPixelAt(0, 2) == Palette::paper(), "chrome starts with the shared paper rule");
     require(image.getPixelAt(Metrics::margin, Metrics::dividerY) == Palette::low(), "chrome draws shared divider");
+    bool logoHasPaper = false;
+    for (int y = defaultLogoBounds.getY(); y < defaultLogoBounds.getBottom(); ++y)
+        for (int x = defaultLogoBounds.getX(); x < defaultLogoBounds.getRight(); ++x)
+            logoHasPaper = logoHasPaper || image.getPixelAt(x, y) == Palette::paper();
+    require(logoHasPaper, "chrome renders the canonical paper logo in the header");
     checkDividerPixels(image, image.getBounds());
     for (int y = Metrics::headerHeight; y < image.getHeight(); ++y)
         for (int x = 0; x < image.getWidth(); ++x)
