@@ -401,7 +401,8 @@ void ParameterDisplay::paint(juce::Graphics& g)
             for (int index = 0; index < notches; ++index)
             {
                 const float phase = static_cast<float>(index + 1) / static_cast<float>(notches + 1);
-                const int x = graph.getX() + juce::roundToInt((phase + (b - 0.5f) * 0.08f * (index % 2 ? 1.0f : -1.0f)) * graph.getWidth());
+                const int x = graph.getX() + juce::roundToInt((phase + (b - 0.5f) * 0.08f * (index % 2 ? 1.0f : -1.0f))
+                                                              * static_cast<float>(graph.getWidth()));
                 const int depth = 6 + quantized(c * (0.5f + d * 0.5f), graph.getHeight() - 6);
                 g.fillRect(x, graph.getCentreY(), 3, juce::jmin(depth, graph.getBottom() - graph.getCentreY()));
             }
