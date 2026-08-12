@@ -4,6 +4,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <set>
 
 namespace
 {
@@ -26,9 +28,18 @@ void checkLayout(juce::Rectangle<int> editor)
         require(cell.getWidth() % 4 == 0 && cell.getHeight() % 4 == 0, "control cell size is grid aligned");
         require(editor.contains(cell), "control cell stays within editor");
         const auto parts = ehl::juce_design::labelledControlBounds(cell);
-        require(parts.label.getWidth() == ehl::juce_design::Metrics::labelWidth, "label width is shared");
-        require(parts.control.getWidth() >= 140, "control keeps a practical compact width");
+        require(parts.label.getHeight() == ehl::juce_design::Metrics::labelHeight, "label height is shared");
+        require(parts.control.getWidth() >= 72, "control keeps a practical compact width");
+        require(parts.control.getHeight() >= 64, "control keeps a practical compact height");
+        require(parts.label.getBottom() <= parts.control.getY(), "label precedes its control");
     }
+
+    require(ehl::juce_design::controlCell(editor, 0).getY()
+                == ehl::juce_design::controlCell(editor, 5).getY(),
+            "first six controls form the primary row");
+    require(ehl::juce_design::controlCell(editor, 6).getY()
+                > ehl::juce_design::controlCell(editor, 5).getY(),
+            "second six controls form the secondary row");
 }
 
 bool imageContains(const juce::Image& image, juce::Colour colour)
@@ -70,6 +81,18 @@ juce::Image renderComponent(juce::Component& component, int width = 200, int hei
     component.paintEntireComponent(graphics, true);
     return image;
 }
+
+std::uint64_t imageFingerprint(const juce::Image& image)
+{
+    std::uint64_t hash = 1469598103934665603ull;
+    for (int y = 0; y < image.getHeight(); ++y)
+        for (int x = 0; x < image.getWidth(); ++x)
+        {
+            hash ^= image.getPixelAt(x, y).getARGB();
+            hash *= 1099511628211ull;
+        }
+    return hash;
+}
 } // namespace
 
 int main()
@@ -89,16 +112,16 @@ int main()
     juce::Slider slider;
     slider.setLookAndFeel(&lookAndFeel);
     styleSlider(slider);
-    require(slider.getSliderStyle() == juce::Slider::LinearHorizontal, "shared slider style");
-    require(slider.getTextBoxPosition() == juce::Slider::TextBoxRight, "shared value placement");
+    require(slider.getSliderStyle() == juce::Slider::RotaryHorizontalVerticalDrag, "shared pixel dial style");
+    require(slider.getTextBoxPosition() == juce::Slider::TextBoxBelow, "shared value placement");
     slider.setRange(0.0, 1.0);
     slider.setValue(0.5);
-    auto sliderImage = renderComponent(slider);
-    require(imageContains(sliderImage, Palette::low()), "enabled slider renders low track");
-    require(imageContains(sliderImage, Palette::mid()), "enabled slider renders mid value");
-    require(imageContains(sliderImage, Palette::paper()), "enabled slider renders paper thumb and value");
+    auto sliderImage = renderComponent(slider, 88, 84);
+    require(imageContains(sliderImage, Palette::low()), "enabled slider renders low ring");
+    require(imageContains(sliderImage, Palette::mid()), "enabled slider renders mid structure");
+    require(imageContains(sliderImage, Palette::paper()), "enabled slider renders paper segments and value");
     slider.setEnabled(false);
-    auto disabledSliderImage = renderComponent(slider);
+    auto disabledSliderImage = renderComponent(slider, 88, 84);
     require(imageContains(disabledSliderImage, Palette::low()), "disabled slider keeps low structure");
     require(imageContains(disabledSliderImage, Palette::mid()), "disabled slider keeps readable mid state");
 
@@ -134,7 +157,8 @@ int main()
     juce::Image image(juce::Image::RGB, Metrics::defaultWidth, Metrics::defaultHeight, true);
     juce::Graphics graphics(image);
     paintEditorChrome(graphics, image.getBounds(), "Product", "EFFECT");
-    require(image.getPixelAt(0, 0) == Palette::ink(), "chrome fills ink background");
+    require(image.getPixelAt(0, 4) == Palette::ink(), "chrome fills ink background below top rule");
+    require(image.getPixelAt(0, 2) == Palette::paper(), "chrome starts with the shared paper rule");
     require(image.getPixelAt(Metrics::margin, Metrics::dividerY) == Palette::low(), "chrome draws shared divider");
     checkDividerPixels(image, image.getBounds());
     for (int y = Metrics::headerHeight; y < image.getHeight(); ++y)
@@ -148,12 +172,41 @@ int main()
     const juce::Rectangle<int> offsetBounds { 24, 12, 320, 180 };
     paintEditorChrome(offsetGraphics, offsetBounds, "Offset", "TEST");
     require(offsetImage.getPixelAt(0, 0) == outside, "offset chrome does not paint outside supplied bounds");
-    require(offsetImage.getPixelAt(offsetBounds.getX(), offsetBounds.getY()) == Palette::ink(),
-            "offset chrome fills supplied bounds");
+    require(offsetImage.getPixelAt(offsetBounds.getX(), offsetBounds.getY()) == Palette::paper(),
+            "offset chrome translates the shared top rule");
+    require(offsetImage.getPixelAt(offsetBounds.getX(), offsetBounds.getY() + 4) == Palette::ink(),
+            "offset chrome fills supplied bounds below the top rule");
     require(offsetImage.getPixelAt(offsetBounds.getX() + Metrics::margin,
                                    offsetBounds.getY() + Metrics::dividerY) == Palette::low(),
             "offset chrome translates the shared divider");
     checkDividerPixels(offsetImage, offsetBounds);
+
+    require(parameterDisplayArea(image.getBounds()).getY() == Metrics::headerHeight,
+            "parameter display starts below header");
+    require(controlArea(image.getBounds()).getY() == Metrics::controlsTop,
+            "controls start below parameter display");
+
+    std::set<std::uint64_t> fingerprints;
+    for (const auto kind : { DisplayKind::delay, DisplayKind::reverb, DisplayKind::comb,
+                             DisplayKind::distortion, DisplayKind::phaser, DisplayKind::flanger,
+                             DisplayKind::compressor, DisplayKind::limiter, DisplayKind::bitcrusher })
+    {
+        ParameterDisplay display(kind);
+        display.setValues({ 0.18f, 0.42f, 0.67f, 0.86f });
+        const auto displayImage = renderComponent(display, 608, Metrics::displayHeight);
+        require(imageContains(displayImage, Palette::ink()), "parameter display uses ink data");
+        require(imageContains(displayImage, Palette::low()), "parameter display uses low field");
+        require(imageContains(displayImage, Palette::mid()), "parameter display uses mid context");
+        require(imageContains(displayImage, Palette::paper()), "parameter display uses paper foreground");
+        fingerprints.insert(imageFingerprint(displayImage));
+    }
+    require(fingerprints.size() == 9, "each effect has a distinct parameter display grammar");
+
+    ParameterDisplay clampedDisplay(DisplayKind::delay);
+    clampedDisplay.setValues({ -2.0f, 2.0f, std::numeric_limits<float>::quiet_NaN(), 0.5f });
+    const auto clamped = clampedDisplay.getValues();
+    require(clamped[0] == 0.0f && clamped[1] == 1.0f && clamped[2] == 0.0f,
+            "parameter display clamps and sanitizes normalized values");
 
     slider.setLookAndFeel(nullptr);
     toggle.setLookAndFeel(nullptr);

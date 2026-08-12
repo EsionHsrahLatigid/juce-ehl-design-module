@@ -1,6 +1,6 @@
 # JUCE EHL Design Module
 
-Reusable JUCE UI primitives for EsionHsrahLatigid audio plug-ins. The module provides the shared monochrome 8-bit palette, compact editor metrics, square control rendering, header paint, and two-column parameter layout.
+Reusable JUCE UI primitives for EsionHsrahLatigid audio plug-ins. The module provides the shared monochrome 8-bit palette, compact editor metrics, quantized control rendering, header paint, six-column parameter layout, and truthful parameter-state displays.
 
 ## Acknowledgements
 
@@ -11,9 +11,10 @@ Built with [JUCE](https://github.com/juce-framework/JUCE) and the EHL monochrome
 - `EHL::JuceDesign` CMake target.
 - Four-level monochrome palette.
 - 640 × 360 compact editor contract with a 512 × 320 minimum.
-- Square horizontal sliders, toggles, combo boxes, focus and disabled states.
-- Shared product header and two-column/six-row labelled-control layout.
-- No images, bundled fonts, visualizers, DSP, or product metadata.
+- Quantized rotary sliders, toggles, combo boxes, focus and disabled states.
+- Shared product header and six-column/two-row labelled-control layout.
+- Nine distinct `ParameterDisplay` grammars driven only by normalized values supplied by a product editor.
+- No images, bundled fonts, fake audio meters, DSP, or product metadata.
 
 ## Requirements
 
@@ -43,9 +44,13 @@ target_link_libraries(MyPlugin PRIVATE EHL::JuceDesign)
 #include <ehl/juce_design/EhlDesign.h>
 
 ehl::juce_design::LookAndFeel lookAndFeel;
+ehl::juce_design::ParameterDisplay parameterDisplay(
+    ehl::juce_design::DisplayKind::delay);
 setLookAndFeel(&lookAndFeel);
 ehl::juce_design::styleSlider(mySlider);
 ehl::juce_design::paintEditorChrome(g, getLocalBounds(), "MyPlugin", "EFFECT");
+parameterDisplay.setBounds(ehl::juce_design::parameterDisplayArea(getLocalBounds()));
+parameterDisplay.setValues({ 0.2f, 0.4f, 0.6f, 0.8f });
 ehl::juce_design::layoutLabelledControl(label, mySlider,
     ehl::juce_design::controlCell(getLocalBounds(), 0));
 ```

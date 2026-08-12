@@ -2,6 +2,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include <array>
 #include <cstddef>
 
 namespace ehl::juce_design
@@ -24,15 +25,17 @@ struct Metrics final
     static constexpr int maximumHeight = 720;
     static constexpr int margin = 16;
     static constexpr int headerHeight = 64;
-    static constexpr int dividerY = 56;
-    static constexpr int columns = 2;
-    static constexpr int rows = 6;
-    static constexpr int columnGap = 16;
+    static constexpr int dividerY = 60;
+    static constexpr int displayHeight = 48;
+    static constexpr int controlsTop = 128;
+    static constexpr int columns = 6;
+    static constexpr int rows = 2;
+    static constexpr int columnGap = 8;
     static constexpr int rowGap = 8;
-    static constexpr int labelWidth = 88;
+    static constexpr int labelHeight = 16;
     static constexpr int labelGap = 4;
     static constexpr int valueWidth = 72;
-    static constexpr int valueHeight = 24;
+    static constexpr int valueHeight = 20;
 };
 
 struct LabelledControlBounds final
@@ -50,6 +53,9 @@ public:
                           float sliderPosition, float minimumSliderPosition,
                           float maximumSliderPosition, juce::Slider::SliderStyle,
                           juce::Slider&) override;
+    void drawRotarySlider(juce::Graphics&, int x, int y, int width, int height,
+                          float sliderPositionProportional, float rotaryStartAngle,
+                          float rotaryEndAngle, juce::Slider&) override;
     void drawToggleButton(juce::Graphics&, juce::ToggleButton&,
                           bool shouldDrawButtonAsHighlighted,
                           bool shouldDrawButtonAsDown) override;
@@ -69,6 +75,35 @@ void paintEditorChrome(juce::Graphics&, juce::Rectangle<int> editorBounds,
                        const juce::String& productName,
                        const juce::String& effectClass);
 
+enum class DisplayKind
+{
+    delay,
+    reverb,
+    comb,
+    distortion,
+    phaser,
+    flanger,
+    compressor,
+    limiter,
+    bitcrusher
+};
+
+class ParameterDisplay final : public juce::Component
+{
+public:
+    explicit ParameterDisplay(DisplayKind);
+
+    void setValues(std::array<float, 4> normalizedValues);
+    const std::array<float, 4>& getValues() const noexcept { return values; }
+    DisplayKind getKind() const noexcept { return kind; }
+    void paint(juce::Graphics&) override;
+
+private:
+    DisplayKind kind;
+    std::array<float, 4> values {};
+};
+
+juce::Rectangle<int> parameterDisplayArea(juce::Rectangle<int> editorBounds) noexcept;
 juce::Rectangle<int> controlArea(juce::Rectangle<int> editorBounds) noexcept;
 juce::Rectangle<int> controlCell(juce::Rectangle<int> editorBounds,
                                  std::size_t index) noexcept;
