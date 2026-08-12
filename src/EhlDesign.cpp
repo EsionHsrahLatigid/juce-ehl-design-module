@@ -195,9 +195,8 @@ void paintEditorChrome(juce::Graphics& g, juce::Rectangle<int> bounds,
                bounds.getWidth() - Metrics::margin * 2, 12,
                juce::Justification::centredLeft, true);
     g.setColour(Palette::low());
-    g.drawHorizontalLine(bounds.getY() + Metrics::dividerY,
-                         static_cast<float>(bounds.getX() + Metrics::margin),
-                         static_cast<float>(bounds.getRight() - Metrics::margin));
+    g.fillRect(bounds.getX() + Metrics::margin, bounds.getY() + Metrics::dividerY,
+               juce::jmax(0, bounds.getWidth() - Metrics::margin * 2), 1);
 }
 
 juce::Rectangle<int> controlArea(juce::Rectangle<int> bounds) noexcept

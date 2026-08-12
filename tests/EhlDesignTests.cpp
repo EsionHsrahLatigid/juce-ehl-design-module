@@ -40,6 +40,28 @@ bool imageContains(const juce::Image& image, juce::Colour colour)
     return false;
 }
 
+void checkDividerPixels(const juce::Image& image, juce::Rectangle<int> bounds)
+{
+    const int dividerY = bounds.getY() + ehl::juce_design::Metrics::dividerY;
+    const int firstX = bounds.getX() + ehl::juce_design::Metrics::margin;
+    const int lastX = bounds.getRight() - ehl::juce_design::Metrics::margin - 1;
+
+    require(image.getPixelAt(firstX - 1, dividerY) == ehl::juce_design::Palette::ink(),
+            "chrome divider starts at editor margin");
+    require(image.getPixelAt(lastX + 1, dividerY) == ehl::juce_design::Palette::ink(),
+            "chrome divider ends before trailing editor margin");
+
+    for (int x = firstX; x <= lastX; ++x)
+    {
+        require(image.getPixelAt(x, dividerY) == ehl::juce_design::Palette::low(),
+                "chrome divider row is exact low");
+        require(image.getPixelAt(x, dividerY - 1) != ehl::juce_design::Palette::low(),
+                "chrome divider does not bleed upward");
+        require(image.getPixelAt(x, dividerY + 1) != ehl::juce_design::Palette::low(),
+                "chrome divider does not bleed downward");
+    }
+}
+
 juce::Image renderComponent(juce::Component& component, int width = 200, int height = 32)
 {
     component.setBounds(0, 0, width, height);
@@ -114,6 +136,7 @@ int main()
     paintEditorChrome(graphics, image.getBounds(), "Product", "EFFECT");
     require(image.getPixelAt(0, 0) == Palette::ink(), "chrome fills ink background");
     require(image.getPixelAt(Metrics::margin, Metrics::dividerY) == Palette::low(), "chrome draws shared divider");
+    checkDividerPixels(image, image.getBounds());
     for (int y = Metrics::headerHeight; y < image.getHeight(); ++y)
         for (int x = 0; x < image.getWidth(); ++x)
             require(image.getPixelAt(x, y) == Palette::ink(), "chrome leaves control field undecorated");
@@ -130,6 +153,7 @@ int main()
     require(offsetImage.getPixelAt(offsetBounds.getX() + Metrics::margin,
                                    offsetBounds.getY() + Metrics::dividerY) == Palette::low(),
             "offset chrome translates the shared divider");
+    checkDividerPixels(offsetImage, offsetBounds);
 
     slider.setLookAndFeel(nullptr);
     toggle.setLookAndFeel(nullptr);
