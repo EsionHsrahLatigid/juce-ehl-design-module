@@ -104,6 +104,7 @@ int main()
     require(Palette::low().getARGB() == 0xff2a2a2a, "low token");
     require(Palette::mid().getARGB() == 0xff8a8a86, "mid token");
     require(Palette::paper().getARGB() == 0xfff2f2f0, "paper token");
+    require(Metrics::commandHeight == 40, "command controls retain a deliberate visual target");
 
     checkLayout({ 0, 0, Metrics::defaultWidth, Metrics::defaultHeight });
     checkLayout({ 0, 0, Metrics::minimumWidth, Metrics::minimumHeight });

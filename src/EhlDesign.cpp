@@ -181,7 +181,7 @@ void LookAndFeel::drawToggleButton(juce::Graphics& g, juce::ToggleButton& button
                                    bool highlighted, bool down)
 {
     auto bounds = button.getLocalBounds().withSizeKeepingCentre(button.getWidth(),
-                                                                 juce::jmin(Metrics::valueHeight, button.getHeight()));
+                                                                 juce::jmin(Metrics::commandHeight, button.getHeight()));
     const bool active = button.getToggleState();
     const bool enabled = button.isEnabled();
     const auto fill = ! enabled ? Palette::low() : (active || down ? Palette::paper() : Palette::ink());
@@ -200,7 +200,7 @@ void LookAndFeel::drawComboBox(juce::Graphics& g, int width, int height, bool is
                                int, int, int, int, juce::ComboBox& box)
 {
     auto bounds = juce::Rectangle<int>(0, 0, width, height)
-                      .withSizeKeepingCentre(width, juce::jmin(28, height));
+                      .withSizeKeepingCentre(width, juce::jmin(Metrics::commandHeight, height));
     const bool inverse = isButtonDown && box.isEnabled();
     g.setColour(! box.isEnabled() ? Palette::low() : (inverse ? Palette::paper() : Palette::ink()));
     g.fillRect(bounds);
@@ -248,6 +248,7 @@ void styleSlider(juce::Slider& slider)
     slider.setColour(juce::Slider::textBoxBackgroundColourId, Palette::ink());
     slider.setColour(juce::Slider::textBoxOutlineColourId, Palette::mid());
     slider.setWantsKeyboardFocus(true);
+    slider.setMouseCursor(juce::MouseCursor::PointingHandCursor);
 }
 
 void styleToggle(juce::ToggleButton& button)

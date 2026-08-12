@@ -36,6 +36,7 @@ struct Metrics final
     static constexpr int labelGap = 4;
     static constexpr int valueWidth = 72;
     static constexpr int valueHeight = 20;
+    static constexpr int commandHeight = 40;
 };
 
 struct LabelledControlBounds final

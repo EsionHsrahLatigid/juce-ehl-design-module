@@ -9,6 +9,7 @@ This module is the single implementation source for the EHL JUCE plug-in family 
 - Parameter field: one 48 px product-selected, parameter-driven display. It visualizes normalized parameter state only; it is never presented as live audio telemetry.
 - Body: six columns by two rows with labels above quantized rotary controls and clean value readouts.
 - States: focus uses a paper outline, active toggles invert, disabled controls use low/mid.
+- Mixed controls: combo boxes and command toggles retain a 40 px visible body inside the larger grid-cell hit target.
 - Product display grammars: delay heads, reverb FDN columns, comb teeth, distortion transfer, phaser notches, flanger heads, compressor curve, limiter ceiling, and bitcrusher stair steps.
 - Prohibited: chromatic accents, gradients, rounded fake hardware, fake meters, decorative visualizers, ornamental panels, bundled fonts, and product DSP.
 
