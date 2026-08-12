@@ -12,6 +12,7 @@ Built with [JUCE](https://github.com/juce-framework/JUCE) and the EHL monochrome
 - Four-level monochrome palette.
 - 640 × 360 compact editor contract with a 512 × 320 minimum.
 - Quantized rotary sliders, toggles, combo boxes, focus and disabled states.
+- Monochrome generic-editor surfaces, property rows, text selection, and square scrollbars with no inherited OS accent colour.
 - 40 px command surfaces for deliberate combo/toggle affordance at the 512 × 320 minimum.
 - Shared product header with the canonical path-rendered `ehl` short mark and a six-column/two-row labelled-control layout.
 - Nine distinct `ParameterDisplay` grammars driven only by normalized values supplied by a product editor.

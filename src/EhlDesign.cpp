@@ -116,6 +116,25 @@ LookAndFeel::LookAndFeel()
     setColour(juce::PopupMenu::textColourId, Palette::paper());
     setColour(juce::PopupMenu::highlightedBackgroundColourId, Palette::paper());
     setColour(juce::PopupMenu::highlightedTextColourId, Palette::ink());
+    setColour(juce::ResizableWindow::backgroundColourId, Palette::ink());
+    setColour(juce::PropertyComponent::backgroundColourId, Palette::ink());
+    setColour(juce::PropertyComponent::labelTextColourId, Palette::paper());
+    setColour(juce::TreeView::backgroundColourId, Palette::ink());
+    setColour(juce::TreeView::linesColourId, Palette::mid());
+    setColour(juce::TreeView::dragAndDropIndicatorColourId, Palette::paper());
+    setColour(juce::TreeView::selectedItemBackgroundColourId, Palette::low());
+    setColour(juce::TreeView::oddItemsColourId, Palette::ink());
+    setColour(juce::TreeView::evenItemsColourId, Palette::ink());
+    setColour(juce::ScrollBar::backgroundColourId, Palette::ink());
+    setColour(juce::ScrollBar::trackColourId, Palette::low());
+    setColour(juce::ScrollBar::thumbColourId, Palette::mid());
+    setColour(juce::TextEditor::backgroundColourId, Palette::ink());
+    setColour(juce::TextEditor::textColourId, Palette::paper());
+    setColour(juce::TextEditor::highlightColourId, Palette::paper());
+    setColour(juce::TextEditor::highlightedTextColourId, Palette::ink());
+    setColour(juce::TextEditor::outlineColourId, Palette::mid());
+    setColour(juce::TextEditor::focusedOutlineColourId, Palette::paper());
+    setColour(juce::CaretComponent::caretColourId, Palette::paper());
 }
 
 void LookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
@@ -229,6 +248,28 @@ void LookAndFeel::positionComboBoxText(juce::ComboBox& box, juce::Label& label)
     label.setBounds(8, 0, box.getWidth() - 32, box.getHeight());
     label.setFont(juce::FontOptions(11.0f));
     label.setJustificationType(juce::Justification::centredLeft);
+}
+
+void LookAndFeel::drawScrollbar(juce::Graphics& g, juce::ScrollBar&, int x, int y,
+                                int width, int height, bool vertical,
+                                int thumbStart, int thumbSize,
+                                bool mouseOver, bool mouseDown)
+{
+    const juce::Rectangle<int> bounds { x, y, width, height };
+    g.setColour(Palette::ink());
+    g.fillRect(bounds);
+
+    const auto track = vertical
+                           ? bounds.withSizeKeepingCentre(4, bounds.getHeight())
+                           : bounds.withSizeKeepingCentre(bounds.getWidth(), 4);
+    g.setColour(Palette::low());
+    g.fillRect(track);
+
+    const auto thumb = vertical
+                           ? juce::Rectangle<int> { track.getX(), thumbStart, track.getWidth(), thumbSize }
+                           : juce::Rectangle<int> { thumbStart, track.getY(), thumbSize, track.getHeight() };
+    g.setColour((mouseOver || mouseDown) ? Palette::paper() : Palette::mid());
+    g.fillRect(thumb.getIntersection(bounds));
 }
 
 juce::Font LookAndFeel::getLabelFont(juce::Label&)

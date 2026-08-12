@@ -206,6 +206,29 @@ int main()
     require(imageContains(disabledComboImage, Palette::low()), "disabled combo uses low fill");
     require(imageContains(disabledComboImage, Palette::mid()), "disabled combo remains readable");
 
+    require(lookAndFeel.findColour(juce::ResizableWindow::backgroundColourId) == Palette::ink(),
+            "generic editor background is EHL ink");
+    require(lookAndFeel.findColour(juce::PropertyComponent::backgroundColourId) == Palette::ink(),
+            "generic property rows use EHL ink");
+    require(lookAndFeel.findColour(juce::TreeView::backgroundColourId) == Palette::ink(),
+            "generic parameter tree uses EHL ink");
+    juce::ScrollBar scrollBar(true);
+    scrollBar.setLookAndFeel(&lookAndFeel);
+    scrollBar.setRangeLimits(0.0, 100.0);
+    scrollBar.setCurrentRange(20.0, 30.0);
+    const auto scrollBarImage = renderComponent(scrollBar, 12, 120);
+    require(imageContains(scrollBarImage, Palette::ink()), "scrollbar uses ink background");
+    require(imageContains(scrollBarImage, Palette::low()), "scrollbar uses low track");
+    require(imageContains(scrollBarImage, Palette::mid()), "scrollbar uses mid thumb");
+    for (int y = 0; y < scrollBarImage.getHeight(); ++y)
+        for (int x = 0; x < scrollBarImage.getWidth(); ++x)
+        {
+            const auto pixel = scrollBarImage.getPixelAt(x, y);
+            require(pixel == Palette::ink() || pixel == Palette::low()
+                        || pixel == Palette::mid() || pixel == Palette::paper(),
+                    "scrollbar must not inherit an OS accent colour");
+        }
+
     juce::Image image(juce::Image::RGB, Metrics::defaultWidth, Metrics::defaultHeight, true);
     juce::Graphics graphics(image);
     paintEditorChrome(graphics, image.getBounds(), "Product", "EFFECT");
@@ -268,6 +291,7 @@ int main()
     slider.setLookAndFeel(nullptr);
     toggle.setLookAndFeel(nullptr);
     combo.setLookAndFeel(nullptr);
+    scrollBar.setLookAndFeel(nullptr);
     std::cout << "ehl_juce_design_tests passed\n";
     return 0;
 }

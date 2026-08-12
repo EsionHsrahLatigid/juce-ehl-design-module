@@ -70,6 +70,10 @@ public:
                       int buttonX, int buttonY, int buttonWidth, int buttonHeight,
                       juce::ComboBox&) override;
     void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
+    void drawScrollbar(juce::Graphics&, juce::ScrollBar&, int x, int y,
+                       int width, int height, bool isScrollbarVertical,
+                       int thumbStartPosition, int thumbSize,
+                       bool isMouseOver, bool isMouseDown) override;
     juce::Font getLabelFont(juce::Label&) override;
 };
 
