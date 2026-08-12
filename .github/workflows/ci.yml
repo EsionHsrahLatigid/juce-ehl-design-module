@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  module:
+    uses: EsionHsrahLatigid/juce-ci/.github/workflows/juce-cmake.yml@6182ac7554be6df6dee46d1e75eb097fde97abaf
+    with:
+      runs-on: macos-26
+      source-directory: .
+      build-directory: build/ci
+      build-type: Release
+      cmake-options: -DEHL_JUCE_DESIGN_BUILD_TESTS=ON
+      build-targets: ehl_juce_design_tests
+      dependency-cache-key: juce-8.0.15
+      run-tests: true
