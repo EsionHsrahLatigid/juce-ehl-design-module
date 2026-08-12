@@ -182,18 +182,22 @@ void styleComboBox(juce::ComboBox& box)
 void paintEditorChrome(juce::Graphics& g, juce::Rectangle<int> bounds,
                        const juce::String& productName, const juce::String& effectClass)
 {
-    g.fillAll(Palette::ink());
+    g.setColour(Palette::ink());
+    g.fillRect(bounds);
     g.setColour(Palette::paper());
     g.setFont(juce::FontOptions(18.0f, juce::Font::bold));
-    g.drawText(productName, Metrics::margin, 8, bounds.getWidth() - Metrics::margin * 2, 24,
+    g.drawText(productName, bounds.getX() + Metrics::margin, bounds.getY() + 8,
+               bounds.getWidth() - Metrics::margin * 2, 24,
                juce::Justification::centredLeft, true);
     g.setColour(Palette::mid());
     g.setFont(juce::FontOptions(10.0f));
-    g.drawText(effectClass, Metrics::margin, 32, bounds.getWidth() - Metrics::margin * 2, 12,
+    g.drawText(effectClass, bounds.getX() + Metrics::margin, bounds.getY() + 32,
+               bounds.getWidth() - Metrics::margin * 2, 12,
                juce::Justification::centredLeft, true);
     g.setColour(Palette::low());
-    g.drawHorizontalLine(Metrics::dividerY, static_cast<float>(Metrics::margin),
-                         static_cast<float>(bounds.getWidth() - Metrics::margin));
+    g.drawHorizontalLine(bounds.getY() + Metrics::dividerY,
+                         static_cast<float>(bounds.getX() + Metrics::margin),
+                         static_cast<float>(bounds.getRight() - Metrics::margin));
 }
 
 juce::Rectangle<int> controlArea(juce::Rectangle<int> bounds) noexcept

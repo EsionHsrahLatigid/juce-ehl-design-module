@@ -118,6 +118,19 @@ int main()
         for (int x = 0; x < image.getWidth(); ++x)
             require(image.getPixelAt(x, y) == Palette::ink(), "chrome leaves control field undecorated");
 
+    juce::Image offsetImage(juce::Image::RGB, 384, 224, true);
+    juce::Graphics offsetGraphics(offsetImage);
+    const auto outside = juce::Colour(0xffff00ff);
+    offsetGraphics.fillAll(outside);
+    const juce::Rectangle<int> offsetBounds { 24, 12, 320, 180 };
+    paintEditorChrome(offsetGraphics, offsetBounds, "Offset", "TEST");
+    require(offsetImage.getPixelAt(0, 0) == outside, "offset chrome does not paint outside supplied bounds");
+    require(offsetImage.getPixelAt(offsetBounds.getX(), offsetBounds.getY()) == Palette::ink(),
+            "offset chrome fills supplied bounds");
+    require(offsetImage.getPixelAt(offsetBounds.getX() + Metrics::margin,
+                                   offsetBounds.getY() + Metrics::dividerY) == Palette::low(),
+            "offset chrome translates the shared divider");
+
     slider.setLookAndFeel(nullptr);
     toggle.setLookAndFeel(nullptr);
     combo.setLookAndFeel(nullptr);
