@@ -64,6 +64,6 @@ ctest --test-dir build --output-on-failure
 
 | 依存関係 | 用途 | ライセンス |
 | --- | --- | --- |
-| JUCE | GUIコンポーネントと描画 | GPLv3または商用JUCEライセンス |
+| JUCE | GUIコンポーネントと描画 | AGPLv3または商用JUCEライセンス |
 
 本リポジトリはMIT Licenseです。JUCEにはJUCE自身のライセンスが適用されます。

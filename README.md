@@ -64,6 +64,6 @@ ctest --test-dir build --output-on-failure
 
 | Dependency | Purpose | Licence |
 | --- | --- | --- |
-| JUCE | GUI components and rendering | GPLv3 or commercial JUCE licence |
+| JUCE | GUI components and rendering | AGPLv3 or commercial JUCE licence |
 
 This repository is licensed under the MIT License. JUCE remains governed by its own licence.
