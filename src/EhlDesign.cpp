@@ -246,6 +246,8 @@ void LookAndFeel::drawComboBox(juce::Graphics& g, int width, int height, bool is
 void LookAndFeel::positionComboBoxText(juce::ComboBox& box, juce::Label& label)
 {
     label.setBounds(8, 0, box.getWidth() - 32, box.getHeight());
+    label.setColour(juce::Label::backgroundColourId, juce::Colours::transparentBlack);
+    label.setColour(juce::Label::outlineColourId, juce::Colours::transparentBlack);
     label.setFont(juce::FontOptions(11.0f));
     label.setJustificationType(juce::Justification::centredLeft);
 }

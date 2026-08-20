@@ -201,6 +201,11 @@ int main()
     require(imageContains(comboImage, Palette::ink()), "combo uses ink fill");
     require(imageContains(comboImage, Palette::mid()), "combo uses mid outline");
     require(imageContains(comboImage, Palette::paper()), "combo uses paper text and arrow");
+    require(comboImage.getPixelAt(comboImage.getWidth() / 2, 0) == Palette::mid(),
+            "combo text does not cover the top outline");
+    require(comboImage.getPixelAt(comboImage.getWidth() / 2, comboImage.getHeight() - 1)
+                == Palette::mid(),
+            "combo text does not cover the bottom outline");
     combo.setEnabled(false);
     const auto disabledComboImage = renderComponent(combo, 160, 32);
     require(imageContains(disabledComboImage, Palette::low()), "disabled combo uses low fill");
