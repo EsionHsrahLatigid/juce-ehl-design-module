@@ -206,6 +206,11 @@ int main()
     require(comboImage.getPixelAt(comboImage.getWidth() / 2, comboImage.getHeight() - 1)
                 == Palette::mid(),
             "combo text does not cover the bottom outline");
+    auto* comboLabel = dynamic_cast<juce::Label*>(combo.getChildComponent(0));
+    require(comboLabel != nullptr, "combo owns a text label");
+    require(comboLabel->getY() == 1
+                && comboLabel->getBottom() == combo.getHeight() - 1,
+            "combo text stays inside the outline");
     combo.setEnabled(false);
     const auto disabledComboImage = renderComponent(combo, 160, 32);
     require(imageContains(disabledComboImage, Palette::low()), "disabled combo uses low fill");
